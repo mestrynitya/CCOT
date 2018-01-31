@@ -3,13 +3,16 @@ import json
 from datetime import datetime
 import threading
 import Queue
+import logging
+
+logging.basicConfig(filename='PortFinder.log',level=logging.DEBUG)
 
 IP_List = 'IPs_LIST.json'
 num_worker_threads = 2
 q = Queue.Queue()
 
 def Create_Dummy_Data():
-    ServerIps = {"192.168.12.14": [], "127.0.0.1": []}
+    ServerIps = {"192.168.12.15": [], "127.0.0.1": []}
     print len(ServerIps)
     Write_data(ServerIps)
 
@@ -66,6 +69,7 @@ def Make_connection(IP_Address):
         #                     sock.close()
         #             except Exception as e:
         #                 print(e)
+        logging.debug('trying %s ' % IP_Address)
         for Port in range(1, 1025):
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -75,9 +79,10 @@ def Make_connection(IP_Address):
                     Server_IPs[IP_Address].append(Port)
                     sock.close()
             except Exception as e:
-                print(e)
+                logging.error('exception %s' % e)
             except socket.error:
-                print "Cannot connect to IP", IP_Address
+                #print "Cannot connect to IP", IP_Address
+                logging.error('Cannot connect to IP %s' % IP_Address)
                 sys.exit()
         Write_data(Server_IPs)
     finally:
